@@ -1,26 +1,38 @@
-# CampusRide
+# CampusRide | IIT BHU
 
-CampusRide is a marketplace for used cycles and scooters at IIT BHU. Buyers can search by ride, hostel, or description, filter by vehicle type and budget, compare prices, save favourites in their browser, and open a listing to contact the seller. Sellers can add up to four photos, edit their listings, mark rides sold, relist them, and delete them.
+CampusRide is a campus marketplace for buying and selling used cycles and scooters. Students can find rides near their hostel, compare listings, and contact sellers to arrange an inspection and payment.
 
-The private deployment is an owner-only review of the marketplace. The three labelled sample listings appear when there are no available student listings. Sellers enter the contact details they want signed-in buyers to see. Students arrange inspection and payment directly.
+**[Open the live CampusRide demo](https://campusride-nesa.onrender.com/)** · [Check API health](https://campusride-nesa.onrender.com/api/health)
 
-## Choose a runtime
+## What you can do
 
-| Runtime | Frontend | Authentication | Data |
-| --- | --- | --- | --- |
-| MERN | React and Vite | CampusRide signup and login, JWT in an HttpOnly cookie, and revocable sessions | Express REST API, MongoDB and Mongoose |
-| Private Sites deployment | Same React frontend | ChatGPT sign-in and private Site access | Cloudflare Worker, D1 listings and R2 photos |
+| Buyers | Sellers |
+| --- | --- |
+| Search by ride, hostel, or description | Create a listing with up to four photos |
+| Filter by vehicle type and budget, then sort by price | Edit a listing, mark it sold, or relist it |
+| Save favourites in your browser | Manage and delete your own listings |
+| Sign in to view a seller’s contact details | Choose the contact details signed-in buyers can see |
 
-Both runtimes use the same listing operations from the frontend. They have separate databases. The app is for the IIT BHU community. Site access is controlled by the host, and MERN email-domain filtering is optional.
+The marketplace updates the current search and filters as listings change. Express sends change notifications with server-sent events, and the visible browse page checks every 15 seconds to recover from missed updates.
 
-On the MERN deployment, the browse page receives live change notifications from Express through server-sent events and reloads the current search and filters. It also checks every 15 seconds while visible to recover from missed events. The private Sites preview checks every five seconds while visible.
+## Tech stack
+
+| Layer | Implementation |
+| --- | --- |
+| Frontend | React, Vite, responsive CSS |
+| Backend | Node.js and Express REST API with input validation and listing ownership checks |
+| Database | MongoDB Atlas and Mongoose schemas for users, sessions, vehicle listings, and photos |
+| Authentication | Signup and login with hashed passwords, JWTs in HttpOnly cookies, and revocable sessions |
+| Deployment | One Docker web service on Render serves both the frontend and API |
+
+A separate private preview uses the same React interface with ChatGPT sign-in, a Cloudflare Worker, D1 for listings, and R2 for photos. Its data is separate from the public MERN demo.
 
 ## Deploy the MERN app to Render
 
 The `render.yaml` Blueprint starts one Docker web service in Singapore. Express serves the React build and API from the same HTTPS URL. MongoDB Atlas stores accounts, listings, and photos.
 
 1. Push the project to GitHub with `render.yaml`, `Dockerfile`, and `package.json` at the repository root.
-2. In MongoDB Atlas, create a cluster and a database user with read/write access to the `campusride` database. Under **Connect → Drivers**, copy the Node.js connection string, fill in the username and password, and use `/campusride` as the database name before any `?` options. URL-encode any reserved characters in the credentials.
+2. In MongoDB Atlas, create a cluster and a database user with read/write access to the `campusride` database. Under **Connect → Drivers**, copy the Node.js connection string, replace the credential placeholders, keep the hostname provided by Atlas, and use `/campusride` as the database name before any `?` options. URL-encode any reserved characters in the credentials.
 3. In Render, choose **New → Blueprint**, connect the GitHub repository, and paste the Atlas connection string into `MONGODB_URI` when prompted. Render generates `JWT_SECRET` and supplies the public HTTPS URL through `RENDER_EXTERNAL_URL`.
 4. Open the Render service and select **Connect → Outbound**. Add the listed CIDR ranges to the Atlas project's IP access list. If the first deploy failed while Atlas access was being configured, choose **Manual Deploy → Deploy latest commit** in Render after the Atlas entries are active.
 5. Open the Render URL and visit `/api/health`. An HTTP `200` with `{"status":"ok"}` confirms database connectivity. On the homepage, create an account and publish a test listing. Check that a second browser on the browse page sees it appear automatically.
@@ -74,6 +86,7 @@ The MERN runtime also exposes `POST /api/auth/signup`, `POST /api/auth/login`, `
 ```sh
 npm run check
 npm run test:private
+npm run build
 npm run build:private
 ```
 
@@ -87,4 +100,4 @@ The Express integration suite starts a temporary MongoDB instance. It may downlo
 - `drizzle/` contains versioned D1 schema migrations.
 - `scripts/` contains the hosted build and isolated local preview.
 
-The source archive can be initialized as a Git repository. Keep `server/.env`, database data, and generated bundles out of version control. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for asset and dependency notices.
+Keep `server/.env`, database data, and generated bundles out of version control. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for asset and dependency notices.
