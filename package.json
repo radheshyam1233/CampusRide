@@ -1,0 +1,29 @@
+{
+  "name": "campusride",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "node scripts/preview-private.mjs",
+    "build": "npm run build -w client",
+    "start": "npm run start -w server",
+    "test": "npm run test -w server",
+    "check": "npm run check -w client && npm test",
+    "seed": "npm run seed -w server",
+    "build:private": "node scripts/build-private.mjs",
+    "preview:private": "node scripts/preview-private.mjs",
+    "test:private": "node --test worker/marketplace.test.js",
+    "dev:mern": "concurrently -n server,client -c green,blue \"npm run dev -w server\" \"npm run dev -w client\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "esbuild": "^0.28.2"
+  }
+}
